@@ -25,7 +25,8 @@
 }
 
 - (void)setupAnimationQueue {
-    self.animationQueue = dispatch_queue_create("net.fuzza.animationQueue", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_attr_t attributes = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0);
+    self.animationQueue = dispatch_queue_create("net.fuzza.animationQueue", attributes);
     dispatch_set_target_queue(self.animationQueue, dispatch_get_main_queue());
 }
 
@@ -34,6 +35,7 @@
         return;
     }
     dispatch_async(self.animationQueue, ^{
+        NSAssert([NSThread isMainThread], @"Animations can't be dispatched outside of main thread");
         dispatch_suspend(self.animationQueue);
         [UIView animateWithDuration:duration animations:^{
             block();
